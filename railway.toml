@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "daphne -b 0.0.0.0 -p $PORT typing_master.asgi:application"
+healthcheckPath = "/health/"
+restartPolicyType = "on_failure"
