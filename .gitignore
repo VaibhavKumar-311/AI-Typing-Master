@@ -1,42 +1,59 @@
-# Python
+# Python Cache
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
+*.pyc
 
 # Virtual Environment
 venv/
 env/
 .venv/
+ENV/
 
-# Environment Variables
+# Environment Variables (SECRET)
 .env
 .env.local
 .env.production
+.env.docker
 
 # Database
 db.sqlite3
 *.sqlite3
 
-# Media Files
+# Media Files (User Uploads)
 media/
 
-# Static (collected)
+# Static Collected
 staticfiles/
+
+# Audit Reports / Temp Files
+*audit*
+*report*
+*.txt
 
 # Node
 node_modules/
 
-# OS
+# OS Files
 .DS_Store
 Thumbs.db
 
 # IDE
 .vscode/
 .idea/
+*.swp
 
 # Logs
 *.log
+logs/
 
-# Docker
-*.env.docker
+# Docker override
+docker-compose.override.yml
+
+# Coverage
+.coverage
+htmlcov/
+
+# Pytest
+.pytest_cache/
