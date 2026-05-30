@@ -1,2 +1,1 @@
-web: daphne -b 0.0.0.0 -p $PORT typing_master.asgi:application
-worker: python manage.py runworker
+web: python -m daphne -b 0.0.0.0 -p ${PORT:-8000} typing_master.asgi:application

@@ -1,20 +1,3 @@
-[[services]]
-name = "web"
-
-[services.build]
-builder = "nixpacks"
-
-[services.deploy]
-startCommand = "daphne -b 0.0.0.0 -p $PORT typing_master.asgi:application"
-healthcheckPath = "/health/"
-restartPolicyType = "on_failure"
-
-[[services]]
-name = "worker"
-
-[services.build]
-builder = "nixpacks"
-
-[services.deploy]
-startCommand = "python manage.py runworker"
+[deploy]
+startCommand = "python -m daphne -b 0.0.0.0 -p ${PORT:-8000} typing_master.asgi:application"
 restartPolicyType = "on_failure"
