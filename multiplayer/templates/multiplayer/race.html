@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Race {{ room_code }} | Typing Master{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-6 px-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-black text-white">Room: <span class="text-purple-400 tracking-widest">{{ room_code }}</span></h1>
+        <button id="ready-btn" class="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-6 rounded-lg transition-all hidden">Ready Up</button>
+    </div>
+
+    <!-- Players Track -->
+    <div class="glass p-6 rounded-xl border border-gray-700/50 shadow-lg mb-6 flex flex-col gap-4" id="players-container">
+        <!-- Player rows injected by JS -->
+    </div>
+
+    <!-- Typing Area -->
+    <div class="glass p-8 rounded-xl border border-gray-700/50 shadow-lg relative min-h-[250px] flex flex-col justify-center">
+        <!-- Status Overlay -->
+        <div id="status-overlay" class="absolute inset-0 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm z-20 rounded-xl">
+            <h2 id="status-text" class="text-5xl font-black text-white tracking-widest uppercase">Waiting for players...</h2>
+        </div>
+
+        <div id="typing-text" class="text-2xl leading-relaxed text-gray-400 font-mono select-none">
+            {{ paragraph }}
+        </div>
+    </div>
+</div>
+
+<!-- Data injection for JS -->
+{{ room_code|json_script:"room-code" }}
+{{ request.user.username|json_script:"current-username" }}
+{{ paragraph|json_script:"race-text" }}
+
+<script type="module">
+    import MultiplayerGame from "{% static 'js/multiplayerGame.js' %}";
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const roomCode = JSON.parse(document.getElementById('room-code').textContent);
+        const username = JSON.parse(document.getElementById('current-username').textContent);
+        const text = JSON.parse(document.getElementById('race-text').textContent);
+        
+        // Expose CSRF token for saving
+        window.CSRF_TOKEN = '{{ csrf_token }}';
+        
+        const game = new MultiplayerGame(roomCode, username, text);
+    });
+</script>
+{% endblock %}

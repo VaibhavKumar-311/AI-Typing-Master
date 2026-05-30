@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block title %}Settings | Typing Master{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-6 px-4">
+    <div class="mb-8">
+        <h1 class="text-4xl font-black text-white">⚙️ Personalization</h1>
+        <p class="text-gray-400 mt-2">Customize your typing workspace.</p>
+    </div>
+
+    <div class="space-y-6">
+        <!-- Themes -->
+        <div class="glass p-6 rounded-xl border border-gray-700">
+            <h2 class="text-xl font-bold text-white mb-4">Themes</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button onclick="ThemeManager.setTheme('dark')" class="p-4 rounded-lg bg-gray-900 border border-gray-700 hover:border-blue-500 text-white font-bold transition-colors">🌙 Dark</button>
+                <button onclick="ThemeManager.setTheme('light')" class="p-4 rounded-lg bg-gray-200 border border-gray-300 hover:border-blue-500 text-gray-900 font-bold transition-colors">☀️ Light</button>
+                <button onclick="ThemeManager.setTheme('matrix')" class="p-4 rounded-lg bg-black border border-green-800 hover:border-green-500 text-green-500 font-bold font-mono transition-colors">01 Matrix</button>
+                <button onclick="ThemeManager.setTheme('neon')" class="p-4 rounded-lg bg-[#0b021d] border border-fuchsia-800 hover:border-cyan-400 text-cyan-400 font-bold transition-colors">⚡ Neon</button>
+                <button onclick="ThemeManager.setTheme('hacker')" class="p-4 rounded-lg bg-black border border-orange-500 hover:border-orange-400 text-orange-500 font-bold font-mono border-dashed transition-colors">_Hacker</button>
+            </div>
+        </div>
+
+        <!-- Audio -->
+        <div class="glass p-6 rounded-xl border border-gray-700">
+            <h2 class="text-xl font-bold text-white mb-4">Audio Pack</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button onclick="ThemeManager.setAudioPack('silent')" class="p-4 rounded-lg bg-gray-800 border border-gray-600 hover:border-blue-500 text-white font-bold transition-colors">🔇 Silent</button>
+                <button onclick="ThemeManager.setAudioPack('mechanical')" class="p-4 rounded-lg bg-gray-800 border border-gray-600 hover:border-blue-500 text-white font-bold transition-colors">⌨️ Mechanical</button>
+                <button onclick="ThemeManager.setAudioPack('terminal')" class="p-4 rounded-lg bg-gray-800 border border-gray-600 hover:border-blue-500 text-white font-bold transition-colors">📟 Terminal Beeps</button>
+            </div>
+        </div>
+        
+        <!-- Accessibility -->
+        <div class="glass p-6 rounded-xl border border-gray-700">
+            <h2 class="text-xl font-bold text-white mb-4">Accessibility</h2>
+            <div class="flex items-center gap-4">
+                <input type="checkbox" id="motion-toggle" class="w-5 h-5" onchange="ThemeManager.setReducedMotion(this.checked)">
+                <label for="motion-toggle" class="text-white font-bold">Reduced Motion Mode (Disables animations and transitions)</label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        window.CSRF_TOKEN = '{{ csrf_token }}';
+        
+        // Init toggles
+        document.getElementById('motion-toggle').checked = (localStorage.getItem('reduced_motion') === 'true');
+    });
+</script>
+{% endblock %}

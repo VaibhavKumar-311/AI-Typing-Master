@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block title %}Test Result | Typing Master{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-8 animate-fade-in-up relative">
+    
+    {% if leveled_up %}
+    <div id="level-up-toast" class="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-full shadow-2xl z-50 animate-bounce flex items-center gap-3 border-4 border-yellow-300">
+        <span class="text-3xl">🎉</span>
+        <div>
+            <p class="font-bold text-lg leading-tight">LEVEL UP!</p>
+            <p class="text-sm">You are now a {{ current_level }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Header -->
+    <div class="text-center mb-10">
+        <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-2">Test Complete</h1>
+        <p class="text-xl text-gray-300">{{ message }}</p>
+    </div>
+
+    <!-- Main Stats Grid -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+        <div class="glass p-6 rounded-xl text-center shadow-lg transform hover:-translate-y-1 transition duration-300">
+            <p class="text-gray-400 text-sm uppercase tracking-wider font-semibold">WPM</p>
+            <p class="text-5xl font-bold text-white mt-2">{{ result.wpm }}</p>
+        </div>
+        <div class="glass p-6 rounded-xl text-center shadow-lg transform hover:-translate-y-1 transition duration-300">
+            <p class="text-gray-400 text-sm uppercase tracking-wider font-semibold">Accuracy</p>
+            <p class="text-5xl font-bold text-blue-400 mt-2">{{ result.accuracy|stringformat:"i" }}%</p>
+        </div>
+        <div class="glass p-6 rounded-xl text-center shadow-lg transform hover:-translate-y-1 transition duration-300">
+            <p class="text-gray-400 text-sm uppercase tracking-wider font-semibold">Mistakes</p>
+            <p class="text-5xl font-bold text-red-400 mt-2">{{ result.mistakes }}</p>
+        </div>
+        <div class="glass p-6 rounded-xl text-center shadow-lg transform hover:-translate-y-1 transition duration-300">
+            <p class="text-gray-400 text-sm uppercase tracking-wider font-semibold">XP Earned</p>
+            <p class="text-5xl font-bold text-purple-400 mt-2">+{{ xp_earned }}</p>
+        </div>
+    </div>
+
+    <!-- Secondary Stats & Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="glass p-6 rounded-xl col-span-2">
+            <h3 class="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Details</h3>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div><span class="text-gray-400">Category:</span> <span class="text-white capitalize">{{ result.category }}</span></div>
+                <div><span class="text-gray-400">Difficulty:</span> <span class="text-white capitalize">{{ result.difficulty }}</span></div>
+                <div><span class="text-gray-400">Duration:</span> <span class="text-white">{{ result.duration }}s</span></div>
+                <div><span class="text-gray-400">CPM:</span> <span class="text-white">{{ result.cpm }}</span></div>
+                <div><span class="text-gray-400">Correct Chars:</span> <span class="text-green-400">{{ correct_chars }}</span></div>
+                <div><span class="text-gray-400">Date:</span> <span class="text-white">{{ result.created_at|date:"M d, Y H:i" }}</span></div>
+            </div>
+        </div>
+        <div class="glass p-6 rounded-xl flex flex-col justify-center gap-4">
+            <a href="{% url 'typing_test' %}?category={{ result.category }}&difficulty={{ result.difficulty }}&duration={{ result.duration }}" class="w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                🔄 Retry Test
+            </a>
+            <button onclick="shareScore()" id="share-btn" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                📤 Share Score
+            </button>
+            <a href="{% url 'history' %}" class="w-full text-center bg-transparent border border-gray-600 hover:bg-gray-800 text-gray-300 font-bold py-3 px-4 rounded-lg transition-colors">
+                View History
+            </a>
+        </div>
+    </div>
+
+    <!-- Charts Placeholder -->
+    <div class="glass p-6 rounded-xl mb-10">
+        <h3 class="text-lg font-semibold text-white mb-4">Performance Visualization</h3>
+        <p class="text-gray-400 text-sm mb-4">Mock chart representation for result page.</p>
+        <div class="relative h-64 w-full">
+            <canvas id="resultChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    function shareScore() {
+        const text = `I just typed ${ {{ result.wpm }} } WPM with ${ {{ result.accuracy }} }% accuracy on TypingMaster! Think you can beat me?`;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('share-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '✅ Copied!';
+            setTimeout(() => { btn.innerHTML = originalText; }, 2000);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        
+        const ctx = document.getElementById('resultChart').getContext('2d');
+        // Simple mock visualization comparing this result to 'average'
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['WPM', 'Accuracy (%)'],
+                datasets: [
+                    {
+                        label: 'Your Result',
+                        data: [{{ result.wpm }}, {{ result.accuracy }}],
+                        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                    },
+                    {
+                        label: 'Global Average (Mock)',
+                        data: [65, 92],
+                        backgroundColor: 'rgba(148, 163, 184, 0.3)',
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

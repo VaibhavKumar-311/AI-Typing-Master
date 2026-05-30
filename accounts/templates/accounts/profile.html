@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="profile-wrapper glass p-8 rounded-xl shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-8 max-w-4xl mx-auto mt-10">
+
+  <!-- Avatar Box -->
+  <div class="avatar-box flex-shrink-0 text-center">
+    <img
+      src="{% if profile.avatar %}{{ profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+      onerror="this.src='https://ui-avatars.com/api/?name={{ request.user.username }}&background=6c63ff&color=fff&size=128'"
+      alt="Avatar"
+      class="avatar-img w-32 h-32 rounded-full object-cover border-4 border-blue-500 shadow-lg mx-auto mb-4"
+    >
+    <form method="POST" enctype="multipart/form-data" class="flex flex-col items-center gap-2 mt-2">
+      {% csrf_token %}
+      <input type="file" name="avatar" accept="image/*" id="avatarInput" style="display: none;">
+      <label for="avatarInput" class="file-upload-label">
+        📁 Choose Photo from Gallery
+      </label>
+      <span id="fileName" class="file-name-text">No file chosen</span>
+      <button type="submit" class="avatar-upload-btn">
+        Update Avatar
+      </button>
+    </form>
+  </div>
+
+  <!-- Info Box -->
+  <div class="profile-info-box flex-grow text-center md:text-left mt-4 md:mt-0">
+    <h2 class="text-3xl font-bold text-white mb-2">{{ request.user.username }}</h2>
+    <p class="text-gray-400 mb-4">Email: {{ request.user.email }}</p>
+    
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
+        <div class="glass px-4 py-3 rounded-lg text-center">
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Level</p>
+            <p class="text-xl font-bold text-purple-400">{{ profile.level }}</p>
+        </div>
+        <div class="glass px-4 py-3 rounded-lg text-center">
+            <p class="text-xs text-gray-400 uppercase tracking-wide">XP</p>
+            <p class="text-xl font-bold text-blue-400">{{ profile.xp }}</p>
+        </div>
+        <div class="glass px-4 py-3 rounded-lg text-center">
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Streak</p>
+            <p class="text-xl font-bold text-orange-400">{{ profile.streak }} days</p>
+        </div>
+        <div class="glass px-4 py-3 rounded-lg text-center">
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Avg WPM</p>
+            <p class="text-xl font-bold text-cyan-400">{{ profile.avg_wpm|default:"N/A" }}</p>
+        </div>
+        <div class="glass px-4 py-3 rounded-lg text-center">
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Accuracy</p>
+            <p class="text-xl font-bold text-green-400">{{ profile.avg_accuracy|default:"N/A" }}%</p>
+        </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+  .file-upload-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #6c63ff, #a855f7);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    border: 2px solid rgba(108, 99, 255, 0.5);
+    transition: all 0.3s ease;
+    box-shadow: 0 0 12px rgba(108, 99, 255, 0.4);
+    margin-top: 10px;
+  }
+  .file-upload-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(108, 99, 255, 0.7);
+    background: linear-gradient(135deg, #a855f7, #6c63ff);
+  }
+  .file-name-text {
+    margin-top: 4px;
+    color: #a0aec0;
+    font-size: 0.85rem;
+  }
+  .avatar-upload-btn {
+    display: inline-block;
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #6c63ff, #a855f7);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-top: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 12px rgba(108, 99, 255, 0.4);
+  }
+  .avatar-upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(108, 99, 255, 0.7);
+  }
+  .avatar-upload-btn:active {
+    transform: translateY(0px);
+  }
+</style>
+
+<script>
+  document.getElementById('avatarInput').addEventListener('change', function() {
+    const fileName = this.files[0] ? this.files[0].name : 'No file chosen';
+    document.getElementById('fileName').textContent = fileName;
+  });
+</script>
+
+{% endblock %}

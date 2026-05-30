@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="32" height="32">
+  <defs>
+    <linearGradient id="neonGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+  </defs>
+  
+  <g transform="translate(5, 5)">
+    <!-- Background Hexagon/Diamond outline -->
+    <polygon points="20,0 40,10 40,30 20,40 0,30 0,10" fill="#0f172a" stroke="url(#neonGlow)" stroke-width="4"/>
+    
+    <!-- Caret text > -->
+    <text x="8" y="28" font-family="'Courier New', monospace" font-size="28" font-weight="900" fill="#22d3ee">&gt;</text>
+    <!-- Underscore _ -->
+    <rect x="24" y="24" width="8" height="6" fill="#fff"/>
+  </g>
+</svg>

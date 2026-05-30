@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ practice.title }} | Coding Mode{% endblock %}
+
+{% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+
+<style>
+    /* Coding Mode Specific Styles */
+    .type-char {
+        opacity: 0.3;
+        transition: opacity 0.05s ease;
+    }
+    .type-char.typed-correct {
+        opacity: 1.0;
+    }
+    .type-char.typed-incorrect {
+        background-color: rgba(239, 68, 68, 0.5); /* Red 500 */
+        opacity: 1.0;
+    }
+    .type-char.active-char {
+        border-bottom: 2px solid #60a5fa; /* Blue 400 */
+        background-color: rgba(96, 165, 250, 0.2);
+    }
+    pre[class*="language-"] {
+        background: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    code[class*="language-"], pre[class*="language-"] {
+        text-shadow: none !important;
+        font-family: 'Fira Code', 'Consolas', monospace !important;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+</style>
+
+<div class="max-w-6xl mx-auto mt-6 px-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-black text-white">{{ practice.title }}</h1>
+            <p class="text-blue-400 text-sm mt-1 uppercase tracking-widest">{{ practice.get_language_display }}</p>
+        </div>
+        
+        <div class="flex gap-8 text-center bg-gray-900/80 px-6 py-3 rounded-lg border border-gray-700">
+            <div>
+                <p class="text-gray-500 text-xs uppercase tracking-widest mb-1">Time</p>
+                <p id="timer-display" class="text-3xl font-black text-white font-mono">0.0s</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs uppercase tracking-widest mb-1">WPM</p>
+                <p id="wpm-display" class="text-3xl font-black text-blue-400 font-mono">0</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs uppercase tracking-widest mb-1">Accuracy</p>
+                <p id="accuracy-display" class="text-3xl font-black text-emerald-400 font-mono">100%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code Editor Arena -->
+    <div class="glass rounded-xl border border-gray-700/50 shadow-2xl relative overflow-hidden bg-[#1d1f21]">
+        <!-- MacOS style window buttons -->
+        <div class="bg-gray-900 px-4 py-2 border-b border-gray-700 flex gap-2">
+            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+        </div>
+        
+        <div id="focus-overlay" class="absolute inset-0 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm z-20 transition-opacity duration-300 cursor-pointer mt-8">
+            <div class="text-center">
+                <span class="text-4xl">🧑‍💻</span>
+                <h2 class="text-2xl font-bold text-white mt-4">Click or press any key to focus</h2>
+            </div>
+        </div>
+
+        <div class="p-6 overflow-x-auto" style="max-height: 60vh; overflow-y: auto;">
+            <input type="text" id="typing-area" class="absolute opacity-0 -z-10" autocomplete="off" spellcheck="false">
+            <pre><code id="code-container" class="language-{{ practice.language }}"></code></pre>
+        </div>
+    </div>
+</div>
+
+<!-- Raw content injection -->
+<textarea id="raw-content" class="hidden">{{ practice.content|safe }}</textarea>
+<input type="hidden" id="language" value="{{ practice.language }}">
+
+<!-- Prism JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+
+<script type="module">
+    import CodingEngine from "{% static 'js/codingEngine.js' %}";
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        // Unescape HTML entities manually before passing to engine
+        const txtArea = document.createElement('textarea');
+        txtArea.innerHTML = document.getElementById('raw-content').value;
+        const rawCode = txtArea.value;
+        
+        const language = document.getElementById('language').value;
+        
+        window.CSRF_TOKEN = '{{ csrf_token }}';
+        
+        new CodingEngine(rawCode, language);
+    });
+</script>
+{% endblock %}

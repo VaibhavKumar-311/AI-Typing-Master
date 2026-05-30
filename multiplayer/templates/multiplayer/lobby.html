@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Multiplayer Lobby | Typing Master{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto mt-10 p-6 glass rounded-xl shadow-lg border border-purple-500/30">
+    <div class="text-center mb-10">
+        <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500 mb-4">Multiplayer Arena</h1>
+        <p class="text-gray-400">Challenge your friends or face off against the world in real-time typing races.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-8">
+        <!-- Create Room -->
+        <div class="bg-gray-800/50 p-8 rounded-lg border border-gray-700 hover:border-purple-500/50 transition-colors flex flex-col items-center justify-center">
+            <h2 class="text-2xl font-bold text-white mb-2">Create a Private Room</h2>
+            <p class="text-gray-400 mb-6 text-center text-sm">Host a private race and invite your friends via room code.</p>
+            <button id="create-room-btn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-purple-500/25 transition-all transform hover:-translate-y-1">
+                Create Room
+            </button>
+        </div>
+
+        <!-- Join Room -->
+        <div class="bg-gray-800/50 p-8 rounded-lg border border-gray-700 hover:border-pink-500/50 transition-colors flex flex-col items-center justify-center">
+            <h2 class="text-2xl font-bold text-white mb-2">Join a Room</h2>
+            <p class="text-gray-400 mb-6 text-center text-sm">Enter a 6-character room code to join an existing race.</p>
+            <div class="w-full flex gap-2">
+                <input type="text" id="room-code-input" class="flex-grow bg-gray-900 border border-gray-600 rounded-lg px-4 py-3 text-white uppercase tracking-widest text-center font-mono focus:border-pink-500 focus:outline-none" placeholder="CODE">
+                <button id="join-room-btn" class="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-pink-500/25 transition-all">
+                    Join
+                </button>
+            </div>
+            <p id="join-error" class="text-red-400 text-sm mt-3 hidden"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('create-room-btn').addEventListener('click', () => {
+        fetch('{% url "api_create_room" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        }).then(r => r.json()).then(data => {
+            if(data.status === 'success') {
+                window.location.href = `/multiplayer/race/${data.room_code}/`;
+            }
+        });
+    });
+
+    document.getElementById('join-room-btn').addEventListener('click', () => {
+        const code = document.getElementById('room-code-input').value.toUpperCase();
+        if(!code) return;
+        
+        fetch('{% url "api_join_room" %}', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ room_code: code })
+        }).then(r => r.json()).then(data => {
+            if(data.status === 'success') {
+                window.location.href = data.url;
+            } else {
+                const err = document.getElementById('join-error');
+                err.innerText = data.message;
+                err.classList.remove('hidden');
+            }
+        });
+    });
+</script>
+{% endblock %}

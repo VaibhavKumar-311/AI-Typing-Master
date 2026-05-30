@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | Typing Master{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">Welcome back, <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">{{ user.username }}</span></h1>
+    <p class="text-gray-400">Here is your typing performance overview.</p>
+</div>
+
+<!-- Stat Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    {% include 'dashboard/components/stat_card.html' with title="Current WPM" value=stats.current_wpm subtitle="Words per minute" icon="⌨️" icon_color="text-green-400" gradient="from-green-600/20 to-emerald-600/20" %}
+    {% include 'dashboard/components/stat_card.html' with title="Best WPM" value=stats.best_wpm subtitle="All-time high" icon="👑" icon_color="text-yellow-400" gradient="from-yellow-600/20 to-orange-600/20" %}
+    {% include 'dashboard/components/stat_card.html' with title="Avg Accuracy" value=stats.avg_accuracy|stringformat:"i"|add:"%" subtitle="Across all tests" icon="🎯" icon_color="text-red-400" gradient="from-red-600/20 to-pink-600/20" %}
+    {% include 'dashboard/components/stat_card.html' with title="XP & Level" value=stats.xp subtitle="Level: "|add:stats.level icon="✨" icon_color="text-purple-400" gradient="from-purple-600/20 to-indigo-600/20" %}
+</div>
+
+<!-- Quick Access Cards -->
+<div class="mb-8">
+    <h3 class="text-lg font-semibold text-white mb-4">Quick Access</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a href="{% url 'falling_words' %}" class="glass p-4 rounded-xl shadow-lg hover:bg-slate-800 transition-colors flex flex-col items-center justify-center text-center group">
+            <span class="text-3xl mb-2 group-hover:scale-110 transition-transform">🎮</span>
+            <span class="text-sm font-semibold text-gray-300 group-hover:text-white">Games</span>
+        </a>
+        <a href="{% url 'multiplayer_lobby' %}" class="glass p-4 rounded-xl shadow-lg hover:bg-slate-800 transition-colors flex flex-col items-center justify-center text-center group">
+            <span class="text-3xl mb-2 group-hover:scale-110 transition-transform">⚔️</span>
+            <span class="text-sm font-semibold text-gray-300 group-hover:text-white">Multiplayer</span>
+        </a>
+        <a href="{% url 'analytics_dashboard' %}" class="glass p-4 rounded-xl shadow-lg hover:bg-slate-800 transition-colors flex flex-col items-center justify-center text-center group">
+            <span class="text-3xl mb-2 group-hover:scale-110 transition-transform">🧠</span>
+            <span class="text-sm font-semibold text-gray-300 group-hover:text-white">Analytics</span>
+        </a>
+        <a href="{% url 'leaderboard' %}" class="glass p-4 rounded-xl shadow-lg hover:bg-slate-800 transition-colors flex flex-col items-center justify-center text-center group">
+            <span class="text-3xl mb-2 group-hover:scale-110 transition-transform">🏆</span>
+            <span class="text-sm font-semibold text-gray-300 group-hover:text-white">Leaderboards</span>
+        </a>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- WPM Progress Chart -->
+    <div class="glass p-6 rounded-xl shadow-lg">
+        <h3 class="text-lg font-semibold text-white mb-4">WPM Progress</h3>
+        <div class="relative h-64 w-full">
+            <canvas id="wpmChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Accuracy Trend Chart -->
+    <div class="glass p-6 rounded-xl shadow-lg">
+        <h3 class="text-lg font-semibold text-white mb-4">Accuracy Trend (%)</h3>
+        <div class="relative h-64 w-full">
+            <canvas id="accuracyChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Heatmap / Activity Placeholder -->
+    <div class="glass p-6 rounded-xl shadow-lg lg:col-span-2">
+        <h3 class="text-lg font-semibold text-white mb-4">Activity Heatmap</h3>
+        <div class="w-full overflow-x-auto">
+            <div class="min-w-[600px] flex gap-1 h-32">
+                <!-- Mock GitHub-style Heatmap generation -->
+                {% for i in "x"|ljust:"52" %}
+                <div class="flex flex-col gap-1">
+                    {% for j in "x"|ljust:"7" %}
+                    <div class="w-3 h-3 rounded-sm bg-slate-800 hover:bg-blue-500 transition-colors cursor-pointer" title="Mock Activity"></div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            <p class="text-xs text-gray-500 mt-2 text-right">Mock Data - Activity Placeholder</p>
+        </div>
+    </div>
+
+    <!-- Streaks & Recent Activity -->
+    <div class="flex flex-col gap-6">
+        <div class="glass p-6 rounded-xl shadow-lg flex items-center justify-between">
+            <div>
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Current Streak</h3>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-3xl font-bold text-orange-400">{{ stats.current_streak }}</span>
+                    <span class="text-sm text-gray-500">days</span>
+                </div>
+            </div>
+            <div class="text-4xl">🔥</div>
+        </div>
+        
+        <div class="glass p-6 rounded-xl shadow-lg flex-grow">
+            <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Recent Activity</h3>
+            <ul class="space-y-4">
+                <li class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <p class="text-sm text-gray-300">Completed <span class="text-white font-medium">1 Minute Test</span> (85 WPM)</p>
+                </li>
+                <li class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                    <p class="text-sm text-gray-300">Leveled up to <span class="text-white font-medium">Intermediate</span></p>
+                </li>
+                <li class="flex items-center gap-3">
+                    <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                    <p class="text-sm text-gray-300">Earned <span class="text-white font-medium">Speed Demon</span> badge</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Initialization -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Shared Chart Settings for Dark Theme
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+        
+        const labels = {{ charts.labels|safe }};
+        
+        // WPM Chart
+        const wpmCtx = document.getElementById('wpmChart').getContext('2d');
+        const wpmGradient = wpmCtx.createLinearGradient(0, 0, 0, 400);
+        wpmGradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)'); // blue-500
+        wpmGradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+        new Chart(wpmCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'WPM',
+                    data: {{ charts.wpm_progress|safe }},
+                    borderColor: '#3b82f6',
+                    backgroundColor: wpmGradient,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#0f172a',
+                    pointBorderColor: '#3b82f6',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: false, min: 40 }
+                }
+            }
+        });
+
+        // Accuracy Chart
+        const accCtx = document.getElementById('accuracyChart').getContext('2d');
+        const accGradient = accCtx.createLinearGradient(0, 0, 0, 400);
+        accGradient.addColorStop(0, 'rgba(16, 185, 129, 0.5)'); // emerald-500
+        accGradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+        new Chart(accCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Accuracy %',
+                    data: {{ charts.accuracy_trend|safe }},
+                    borderColor: '#10b981',
+                    backgroundColor: accGradient,
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#0f172a',
+                    pointBorderColor: '#10b981',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: false, min: 80, max: 100 }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

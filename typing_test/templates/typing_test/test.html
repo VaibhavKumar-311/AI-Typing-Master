@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Typing Test | Typing Master{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto mt-4">
+    <!-- Options Bar -->
+    <div class="glass p-4 rounded-xl flex flex-wrap gap-6 items-center justify-between mb-8 text-sm text-gray-300">
+        <div class="flex gap-4 items-center">
+            <span class="font-bold text-white">Mode:</span>
+            <select id="time-selector" class="bg-slate-800 border border-slate-600 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+                <option value="30" {% if retry_duration == '30' %}selected{% endif %}>30s</option>
+                <option value="60" {% if retry_duration == '60' or not retry_duration %}selected{% endif %}>60s</option>
+                <option value="120" {% if retry_duration == '120' %}selected{% endif %}>120s</option>
+            </select>
+        </div>
+        <div class="flex gap-4 items-center">
+            <span class="font-bold text-white">Category:</span>
+            <select id="category-selector" class="bg-slate-800 border border-slate-600 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+                <option value="english" {% if retry_category == 'english' or not retry_category %}selected{% endif %}>English</option>
+                <option value="coding" {% if retry_category == 'coding' %}selected{% endif %}>Coding</option>
+                <option value="numbers" {% if retry_category == 'numbers' %}selected{% endif %}>Numbers</option>
+                <option value="symbols" {% if retry_category == 'symbols' %}selected{% endif %}>Symbols</option>
+                <option value="ai_tech" {% if retry_category == 'ai_tech' %}selected{% endif %}>AI/Tech</option>
+            </select>
+        </div>
+        <div class="flex gap-4 items-center">
+            <span class="font-bold text-white">Difficulty:</span>
+            <select id="difficulty-selector" class="bg-slate-800 border border-slate-600 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+                <option value="easy" {% if retry_difficulty == 'easy' %}selected{% endif %}>Easy</option>
+                <option value="medium" {% if retry_difficulty == 'medium' or not retry_difficulty %}selected{% endif %}>Medium</option>
+                <option value="hard" {% if retry_difficulty == 'hard' %}selected{% endif %}>Hard</option>
+                <option value="expert" {% if retry_difficulty == 'expert' %}selected{% endif %}>Expert</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="flex justify-between items-center mb-6 px-4">
+        <div class="text-4xl font-mono font-bold text-blue-400" id="timer-display">60</div>
+        <div class="flex gap-8 text-gray-400 text-sm font-mono">
+            <div class="flex flex-col items-center">
+                <span class="text-2xl text-white font-bold" id="wpm-display">0</span>
+                <span>WPM</span>
+            </div>
+            <div class="flex flex-col items-center">
+                <span class="text-2xl text-white font-bold" id="accuracy-display">100%</span>
+                <span>ACC</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typing Area -->
+    <div class="relative w-full min-h-[150px] p-6 text-2xl font-mono text-gray-500 leading-relaxed select-none focus:outline-none" id="typing-area" tabindex="0">
+        <!-- Caret (Animated) -->
+        <div id="caret" class="absolute w-[2px] h-8 bg-blue-500 transition-all duration-75 ease-out hidden"></div>
+        <!-- Text container -->
+        <div id="text-container" class="relative z-10 w-full break-words"></div>
+        
+        <!-- Overlay on unfocus -->
+        <div id="focus-overlay" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center rounded-xl cursor-pointer transition-opacity z-20">
+            <p class="text-white font-semibold">Click here or press any key to focus</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const SAVE_RESULT_URL = "{% url 'api_save_result' %}";
+    const GET_PARAGRAPH_URL = "{% url 'api_get_paragraph' %}";
+    const CSRF_TOKEN = "{{ csrf_token }}";
+</script>
+<script type="module" src="{% static 'js/typing_engine/typingEngine.js' %}"></script>
+
+<style>
+    /* Typing Engine Specific Styles */
+    .correct { color: #f8fafc; } /* white */
+    .incorrect { color: #ef4444; background: rgba(239, 68, 68, 0.2); border-radius: 2px;} /* red-500 */
+    .active-char { border-bottom: 2px solid #3b82f6; }
+    
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+    .caret-blink { animation: blink 1s infinite; }
+</style>
+{% endblock %}
